@@ -1,10 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-admin-panel',
   standalone: true,
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './admin-panel.component.html',
   styleUrl: './admin-panel.component.css',
 })
@@ -12,17 +13,19 @@ export class AdminPanelComponent {
   private file: File | undefined;
   private httpClient = inject(HttpClient);
 
+  public apiKey: string = '';
+
   async onUpload() {
     if (!this.file) {
       return;
     }
-    const owner = 'winterberryice';
-    const repo = 'api-test';
-    const path = encodeURIComponent(this.file.name);
-    const branch = 'main';
+    const owner = 'parafia-zolkiewka';
+    const repo = 'parafia-zolkiewka.github.io';
+    const path = encodeURIComponent(`src/assets/` + this.file.name);
+    const branch = 'master';
     //The token must have the following permission set:
     // contents:write
-    const token = '';
+    const token = this.apiKey;
 
     const base64 = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
