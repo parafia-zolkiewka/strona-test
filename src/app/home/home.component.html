@@ -1,11 +1,15 @@
-<p>home works!</p>
-
 <h2>Ogłoszenia</h2>
 <ul>
-  <li *ngFor="let ogloszenie of ogloszenia">{{ formatDate(ogloszenie) }}</li>
+  <li *ngFor="let ogloszenie of ogloszenia">
+    <a [routerLink]="['/ogloszenia', ogloszenie]">{{
+      formatDate(ogloszenie)
+    }}</a>
+  </li>
 </ul>
 
 <h2>Intencje</h2>
 <ul>
-  <li *ngFor="let intencja of intencje">{{ formatDate(intencja) }}</li>
+  <li *ngFor="let intencja of intencje">
+    <a [routerLink]="['/intencje', intencja]">{{ formatDate(intencja) }}</a>
+  </li>
 </ul>
