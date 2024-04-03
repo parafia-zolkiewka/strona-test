@@ -11,14 +11,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      
-      - name: Create .env with Github Secrets
-        run: |
-          touch .env
-          echo CLIENT_ID=$CLIENT_ID >> .env
-          echo CLIENT_SECRET=$CLIENT_SECRET >> .env
-          echo REFRESH_TOKEN=$REFRESH_TOKEN >> .env
-          echo GALLERY_FOLDER_ID=$GALLERY_FOLDER_ID >> .env
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
@@ -28,19 +20,22 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build
-        run: npm run build
+      - name: Create .env with Github Secrets and Build
+        run: |
+          touch .env
+          echo CLIENT_ID=$CLIENT_ID >> .env
+          echo CLIENT_SECRET=$CLIENT_SECRET >> .env
+          echo REFRESH_TOKEN=$REFRESH_TOKEN >> .env
+          echo GALLERY_FOLDER_ID=$GALLERY_FOLDER_ID >> .env
+          npm run build
         env:
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
           GALLERY_FOLDER_ID: ${{ secrets.GALLERY_FOLDER_ID }}
-
-      - name: List
-        run: ls -la
       
       - name: Fix routing
-        run: cp index.html 404.html
+        run: cp dist/strona/browser/index.html dist/strona/browser/404.html
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.5
