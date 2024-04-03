@@ -35,6 +35,9 @@ jobs:
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
           GALLERY_FOLDER_ID: ${{ secrets.GALLERY_FOLDER_ID }}
+
+      - name: List
+        run: ls -la
       
       - name: Fix routing
         run: cp index.html 404.html
