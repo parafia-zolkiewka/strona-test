@@ -16,6 +16,7 @@ oAuth2Client.setCredentials({
 
 saveFilenames(intencjePath, path.join(__dirname, '..', 'src', 'assets', 'intencje.json'));
 saveFilenames(ogloszeniaPath, path.join(__dirname, '..', 'src', 'assets', 'ogloszenia.json'));
+console.log(`test: ${process.env.TEST}`);
 savePhotos(path.join(__dirname, '..', 'src', 'assets', 'zdjecia.json'));
 
 function saveFilenames(scanPath, savePath) {
