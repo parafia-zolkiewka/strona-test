@@ -12,7 +12,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       
-      - name: Create .env with Github Secrets and run script
+      - name: Create .env with Github Secrets
         run: |
           touch .env
           echo CLIENT_ID=$CLIENT_ID >> .env
@@ -35,6 +35,9 @@ jobs:
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
           GALLERY_FOLDER_ID: ${{ secrets.GALLERY_FOLDER_ID }}
+      
+      - name: Fix routing
+        run: cp index.html 404.html
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.5
