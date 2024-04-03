@@ -11,6 +11,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      
+      - name: Create .env with Github Secrets and run script
+        run: |
+          touch .env
+          echo TEST=$TEST >> .env
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
@@ -22,6 +27,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          TEST: ${{ secrets.TEST }}
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.5
