@@ -20,14 +20,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Create .env with Github Secrets and Build
-        run: |
-          touch .env
-          echo CLIENT_ID=$CLIENT_ID >> .env
-          echo CLIENT_SECRET=$CLIENT_SECRET >> .env
-          echo REFRESH_TOKEN=$REFRESH_TOKEN >> .env
-          echo GALLERY_FOLDER_ID=$GALLERY_FOLDER_ID >> .env
-          npm run build
+      - name: Build
+        run: npm run build
         env:
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
