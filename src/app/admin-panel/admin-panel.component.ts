@@ -5,6 +5,10 @@ import { firstValueFrom } from 'rxjs';
 
 const TOKEN_STORAGE_KEY = 'token';
 
+function salt() {
+  return `salt=${new Date().getTime()}`;
+}
+
 @Component({
   selector: 'app-admin-panel',
   standalone: true,
@@ -55,7 +59,9 @@ export class AdminPanelComponent implements OnInit {
     try {
       const response = await firstValueFrom(
         this.httpClient.get<{ sha: string }>(
-          `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${path}?ref=${this.branch}`,
+          `https://api.github.com/repos/${this.owner}/${
+            this.repo
+          }/contents/${path}?ref=${this.branch}&${salt()}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -97,7 +103,9 @@ export class AdminPanelComponent implements OnInit {
     try {
       const value = await firstValueFrom(
         this.httpClient.put(
-          `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${path}`,
+          `https://api.github.com/repos/${this.owner}/${
+            this.repo
+          }/contents/${path}?${salt()}`,
           {
             message: `upload file ${location}/${date}.html [skip ci]`,
             content: await this.base64(file),
@@ -126,7 +134,9 @@ export class AdminPanelComponent implements OnInit {
     try {
       const response = await firstValueFrom(
         this.httpClient.get<{ sha: string }>(
-          `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${path}?ref=${this.branch}`,
+          `https://api.github.com/repos/${this.owner}/${
+            this.repo
+          }/contents/${path}?ref=${this.branch}&${salt()}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -152,7 +162,9 @@ export class AdminPanelComponent implements OnInit {
     try {
       const response = await firstValueFrom(
         this.httpClient.put(
-          `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${path}`,
+          `https://api.github.com/repos/${this.owner}/${
+            this.repo
+          }/contents/${path}?${salt()}`,
           {
             message: `Reload content ${dateString}`,
             content: await this.base64(new File([dateString], 'date.txt')),
