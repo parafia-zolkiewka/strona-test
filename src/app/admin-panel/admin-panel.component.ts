@@ -52,9 +52,7 @@ export class AdminPanelComponent implements OnInit {
     }
     const token = this.apiKey;
     const date = this.date;
-    const path = encodeURIComponent(
-      `src/assets/` + location + '/' + date + '.html'
-    );
+    const path = `src/assets/${location}/${date}.html`;
 
     try {
       const response = await firstValueFrom(
@@ -123,7 +121,7 @@ export class AdminPanelComponent implements OnInit {
   }
 
   async onReloadContent() {
-    const path = encodeURIComponent('date.txt');
+    const path = 'date.txt';
     const token = this.apiKey;
     const date = new Date().toISOString();
 
