@@ -1,7 +1,21 @@
 <p>admin-panel works!</p>
 
 <div>
-  <input type="file" (change)="onFileChange($event)" />
   <input placeholder="token" [(ngModel)]="apiKey" />
-  <button (click)="onUpload()">Upload</button>
+  <button (click)="onUpload()">Zaktualizuj</button>
+  <button (click)="onReloadContent()">Aktualizuj galerię</button>
+</div>
+
+<div>
+  <input placeholder="data (yyyy-mm-dd)" [(ngModel)]="date" />
+</div>
+
+<div>
+  Ogłoszenia:
+  <input type="file" accept=".html" (change)="onAnnouncementsFileChange($event)" />
+</div>
+
+<div>
+  Intencje:
+  <input type="file" accept=".html" (change)="onIntentionsFileChange($event)" />
 </div>
