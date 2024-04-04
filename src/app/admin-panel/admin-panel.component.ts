@@ -36,10 +36,8 @@ export class AdminPanelComponent implements OnInit {
       return;
     }
     try {
-      await Promise.all([
-        this.fetchAndUpdateFile(this.announcementsFile, 'ogloszenia'),
-        this.fetchAndUpdateFile(this.intentionsFile, 'intencje'),
-      ]);
+      await this.fetchAndUpdateFile(this.announcementsFile, 'ogloszenia');
+      await this.fetchAndUpdateFile(this.intentionsFile, 'intencje');
     } catch (error) {
       console.error('Error uploading files:', error);
     }
