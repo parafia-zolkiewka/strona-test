@@ -1,8 +1,9 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import * as CryptoJS from 'crypto-js';
-import { file } from 'googleapis/build/src/apis/file';
+import { firstValueFrom } from 'rxjs';
+
+const TOKEN_STORAGE_KEY = 'token';
 
 @Component({
   selector: 'app-admin-panel',
@@ -11,7 +12,7 @@ import { file } from 'googleapis/build/src/apis/file';
   templateUrl: './admin-panel.component.html',
   styleUrl: './admin-panel.component.css',
 })
-export class AdminPanelComponent {
+export class AdminPanelComponent implements OnInit {
   private announcementsFile: File | undefined;
   private intentionsFile: File | undefined;
   private httpClient = inject(HttpClient);
@@ -22,16 +23,26 @@ export class AdminPanelComponent {
   public apiKey: string = '';
   public date: string = '';
 
+  ngOnInit(): void {
+    this.apiKey = localStorage.getItem(TOKEN_STORAGE_KEY) || '';
+  }
+
+  private saveTokenToStorage(token: string) {
+    localStorage.setItem(TOKEN_STORAGE_KEY, token);
+  }
+
   async onUpload() {
     if (!this.announcementsFile && !this.intentionsFile) {
       return;
     }
-    // TODO naprawić sekwencję
-    this.fetchAndUpdateFile(this.announcementsFile, 'ogloszenia');
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    this.fetchAndUpdateFile(this.intentionsFile, 'intencje');
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    // TODO naprawić, bo czasami zwraca 409
+    try {
+      await Promise.all([
+        this.fetchAndUpdateFile(this.announcementsFile, 'ogloszenia'),
+        this.fetchAndUpdateFile(this.intentionsFile, 'intencje'),
+      ]);
+    } catch (error) {
+      console.error('Error uploading files:', error);
+    }
     await this.onReloadContent();
   }
 
@@ -41,68 +52,74 @@ export class AdminPanelComponent {
     }
     const token = this.apiKey;
     const date = this.date;
-    const path = encodeURIComponent(`src/assets/` + location + '/' + date + '.html');
+    const path = encodeURIComponent(
+      `src/assets/` + location + '/' + date + '.html'
+    );
 
-    const observer = {
-      next: (response: any) => {
-        console.log('Updating existing file');
-        this.updateFile(file, location, date, path, token, response.sha);
-      },
-      error: (error: HttpErrorResponse) => {
-        console.log('Creating a new file');
-        this.updateFile(file, location, date, path, token, null);
-      }
-    };
-
-    this.httpClient
-      .get(
-        `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${path}?ref=${this.branch}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+    try {
+      const response = await firstValueFrom(
+        this.httpClient.get<{ sha: string }>(
+          `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${path}?ref=${this.branch}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        }
-      )
-      .subscribe(observer);
+        )
+      );
+      console.log('Updating existing file');
+      await this.updateFile(file, location, date, path, token, response.sha);
+    } catch (error) {
+      console.log('Creating a new file');
+      await this.updateFile(file, location, date, path, token, null);
+    }
   }
 
-  private async updateFile(file: File, location: string, date: string, path: string, token: string, sha: string | null) {
-    const base64 = await new Promise<string>((resolve, reject) => {
+  private async base64(file: File) {
+    return new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
-      if (!this.announcementsFile) {
+      if (!file) {
         return reject();
       }
-      reader.readAsDataURL(this.announcementsFile);
+      reader.readAsDataURL(file);
       reader.onloadend = () => {
         const string = reader.result as string;
         resolve(string.split(',')[1]);
       };
     });
+  }
 
-    this.httpClient
-      .put(
-        `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${path}`,
-        {
-          message: `upload file ${location}/${date}.html [skip ci]`,
-          content: base64,
-          branch: this.branch,
-          sha: sha
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+  private async updateFile(
+    file: File,
+    location: string,
+    date: string,
+    path: string,
+    token: string,
+    sha: string | null
+  ) {
+    this.saveTokenToStorage(token);
+    try {
+      const value = await firstValueFrom(
+        this.httpClient.put(
+          `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${path}`,
+          {
+            message: `upload file ${location}/${date}.html [skip ci]`,
+            content: await this.base64(file),
+            branch: this.branch,
+            sha: sha,
           },
-        }
-      )
-      .subscribe({
-        next(value) {
-          console.log('success', value);
-        },
-        error(err) {
-          console.error('error', err);
-        },
-      });
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+      );
+      console.log('success', value);
+    } catch (error) {
+      console.error('error', error);
+    }
   }
 
   async onReloadContent() {
@@ -110,56 +127,54 @@ export class AdminPanelComponent {
     const token = this.apiKey;
     const date = new Date().toISOString();
 
-    const observer = {
-      next: (response: any) => {
-        console.log('Updating existing file');
-        this.reloadContent(path, date, response.sha, token);
-      },
-      error: (error: HttpErrorResponse) => {
-        console.log('Creating a new file');
-        this.reloadContent(path, date, null, token);
-      }
-    };
-
-    this.httpClient
-      .get(
-        `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${path}?ref=${this.branch}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+    try {
+      const response = await firstValueFrom(
+        this.httpClient.get<{ sha: string }>(
+          `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${path}?ref=${this.branch}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        }
-      )
-      .subscribe(observer);
+        )
+      );
+      console.log('Updating existing file');
+      await this.reloadContent(path, date, response.sha, token);
+    } catch (error) {
+      console.log('Creating a new file');
+      await this.reloadContent(path, date, null, token);
+    }
   }
 
-  private async reloadContent(path: string, dateString: string, sha: string | null, token: string) {
-    const observer = {
-      next: (response: any) => {
-        console.log('Content reload triggered successfully', response);
-      },
-      error: (error: HttpErrorResponse) => {
-        console.error('Error triggering content reload:', error);
-      }
-    };
-
-    this.httpClient
-      .put(
-        `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${path}`,
-        {
-          message: `Reload content ${dateString}`,
-          content: btoa(dateString),
-          branch: this.branch,
-          sha: sha, // Include sha if available, otherwise it will be omitted
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+  private async reloadContent(
+    path: string,
+    dateString: string,
+    sha: string | null,
+    token: string
+  ) {
+    this.saveTokenToStorage(token);
+    try {
+      const response = await firstValueFrom(
+        this.httpClient.put(
+          `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${path}`,
+          {
+            message: `Reload content ${dateString}`,
+            content: await this.base64(new File([dateString], 'date.txt')),
+            branch: this.branch,
+            sha: sha, // Include sha if available, otherwise it will be omitted
           },
-        }
-      )
-      .subscribe(observer);
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+      );
+      console.log('Content reload triggered successfully', response);
+    } catch (error) {
+      console.error('Error triggering content reload:', error);
+    }
   }
 
   onAnnouncementsFileChange($event: Event) {
