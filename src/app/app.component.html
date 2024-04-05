@@ -1,19 +1,32 @@
-<header class="bg-neutral-400">
-  <div class="flex justify-between items-center">
-    <a class="p-1" routerLink="/"
-      ><div class="flex flex-col uppercase font-bold text-sm">
-        <div>Parafia świętego</div>
-        <div>wawrzyńca</div>
-      </div></a
-    >
-    <button class="flex md:hidden p-2 bg-green-400" (click)="toggle()">
-      @if (menuOpen) {
-      <mat-icon fontIcon="close" />
-      }@else{
-      <mat-icon fontIcon="menu" />
-      }
-    </button>
-    <nav class="hidden md:flex">
+<header class="bg-blue-600 text-white py-1 px-2">
+  <div class="container max-w-screen-lg mx-auto">
+    <div class="flex justify-between items-center">
+      <a class="p-1" routerLink="/" (click)="closeMenu()"
+        ><div class="flex flex-col uppercase font-bold text-sm">
+          <div>Parafia świętego</div>
+          <div>wawrzyńca</div>
+        </div></a
+      >
+      <button class="flex md:hidden p-2" (click)="toggle()">
+        @if (menuOpen) {
+        <mat-icon fontIcon="close" />
+        }@else{
+        <mat-icon fontIcon="menu" />
+        }
+      </button>
+      <nav class="hidden md:flex">
+        @for (option of menuOptions;track option.path) {
+        <a
+          routerLink="{{ option.path }}"
+          class="hover:underline text-center"
+          (click)="closeMenu()"
+          ><div class="p-2">{{ option.name }}</div></a
+        >
+        }
+      </nav>
+    </div>
+    @if (menuOpen) {
+    <nav class="flex flex-col">
       @for (option of menuOptions;track option.path) {
       <a
         routerLink="{{ option.path }}"
@@ -23,19 +36,10 @@
       >
       }
     </nav>
-  </div>
-  @if (menuOpen) {
-  <nav class="flex flex-col">
-    @for (option of menuOptions;track option.path) {
-    <a
-      routerLink="{{ option.path }}"
-      class="hover:underline text-center"
-      (click)="closeMenu()"
-      ><div class="p-2">{{ option.name }}</div></a
-    >
     }
-  </nav>
-  }
+  </div>
 </header>
 
-<router-outlet />
+<main class="container max-w-screen-lg mx-auto p-2">
+  <router-outlet />
+</main>
