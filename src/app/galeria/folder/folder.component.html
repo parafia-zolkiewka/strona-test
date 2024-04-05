@@ -1,0 +1,15 @@
+<p>folder works!</p>
+<button (click)="goBack()">Wróć</button>
+
+@if (folder) {
+<div>
+    <img src="https://lh3.googleusercontent.com/d/{{folder.fileIds[currentIndex]}}">
+</div>
+<div>
+    {{currentIndex + 1}}/{{folder.fileIds.length}}
+</div>
+<div>
+    <button (click)="moveLeft()">Poprzednie</button>
+    <button (click)="moveRight()">Następne</button>
+</div>
+}

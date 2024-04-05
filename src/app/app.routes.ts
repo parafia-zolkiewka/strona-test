@@ -5,6 +5,7 @@ import { IntencjeComponent } from './intencje/intencje.component';
 import { OgloszeniaComponent } from './ogloszenia/ogloszenia.component';
 import { GaleriaComponent } from './galeria/galeria.component';
 import { NabozenstwaComponent } from './nabozenstwa/nabozenstwa.component';
+import { FolderComponent } from './galeria/folder/folder.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -12,6 +13,7 @@ export const routes: Routes = [
   { path: 'intencje/:date', component: IntencjeComponent },
   { path: 'ogloszenia/:date', component: OgloszeniaComponent },
   { path: 'galeria', component: GaleriaComponent },
+  { path: 'galeria/:name', component: FolderComponent },
   { path: 'nabozenstwa', component: NabozenstwaComponent },
   { path: '**', redirectTo: '' },
 ];
