@@ -1,38 +1,27 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Component, OnInit, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { Folder } from './folder';
 
 @Component({
   selector: 'app-galeria',
   standalone: true,
-  imports: [],
+  imports: [RouterModule],
   templateUrl: './galeria.component.html',
   styleUrl: './galeria.component.css'
 })
-export class GaleriaComponent implements OnInit, OnDestroy {
+export class GaleriaComponent implements OnInit {
   private httpClient = inject(HttpClient);
-  private route = inject(ActivatedRoute);
-  private sub: Subscription | undefined;
 
-  public content: string = '';
+  public folders: Folder[] = [];
 
   ngOnInit(): void {
-    const that = this;
-    that.sub = that.route.params.subscribe((params) => {
-      that.httpClient
-        .get(`assets/zdjecia.json`, {
-          responseType: 'text',
-        })
-        .subscribe((data) => {
-          // TODO parsowanie pliku i wyświetlenie galerii
-          that.content = data;
-        });
-    });
+    this.httpClient
+      .get(`assets/zdjecia.json`, {
+        responseType: 'text',
+      })
+      .subscribe((data) => {
+        this.folders = JSON.parse(data);
+      });
   }
-
-  ngOnDestroy(): void {
-    this.sub?.unsubscribe();
-  }
-
 }
