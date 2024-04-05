@@ -6,12 +6,16 @@ import { OgloszeniaComponent } from './ogloszenia/ogloszenia.component';
 import { GaleriaComponent } from './galeria/galeria.component';
 import { NabozenstwaComponent } from './nabozenstwa/nabozenstwa.component';
 import { FolderComponent } from './galeria/folder/folder.component';
+import { OgloszeniaWybraneComponent } from './ogloszenia/ogloszenia.wybrane/ogloszenia.wybrane.component';
+import { IntencjeWybraneComponent } from './intencje/intencje.wybrane/intencje.wybrane.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'admin', component: AdminPanelComponent },
-  { path: 'intencje/:date', component: IntencjeComponent },
-  { path: 'ogloszenia/:date', component: OgloszeniaComponent },
+  { path: 'intencje', component: IntencjeComponent },
+  { path: 'intencje/:date', component: IntencjeWybraneComponent },
+  { path: 'ogloszenia', component: OgloszeniaComponent },
+  { path: 'ogloszenia/:date', component: OgloszeniaWybraneComponent },
   { path: 'galeria', component: GaleriaComponent },
   { path: 'galeria/:name', component: FolderComponent },
   { path: 'nabozenstwa', component: NabozenstwaComponent },

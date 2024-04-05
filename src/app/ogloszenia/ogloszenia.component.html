@@ -1,3 +1,11 @@
 <p>ogloszenia works!</p>
 
 <div style="max-width: 717px" [innerHTML]="content"></div>
+
+@for (ogloszenie of ogloszenia; track $index) {
+    <a [routerLink]="['/ogloszenia', ogloszenie]">
+        <button>
+            <div>{{ogloszenie}}</div>
+        </button>
+    </a>
+}

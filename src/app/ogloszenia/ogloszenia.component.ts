@@ -1,29 +1,37 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-ogloszenia',
   standalone: true,
-  imports: [],
+  imports: [RouterModule],
   templateUrl: './ogloszenia.component.html',
   styleUrl: './ogloszenia.component.css',
 })
 export class OgloszeniaComponent implements OnInit, OnDestroy {
   private httpClient = inject(HttpClient);
-  private route = inject(ActivatedRoute);
   private sanitizer = inject(DomSanitizer);
-  private sub: Subscription | undefined;
-
+  private date: string = '';
+  
   public content: string = '';
+  public ogloszenia: string[] = [];
 
   ngOnInit(): void {
     const that = this;
-    that.sub = that.route.params.subscribe((params) => {
+
+    that.httpClient.get('assets/ogloszenia.json').subscribe((data) => {
+      const ogloszenia = data as string[];
+      ogloszenia.sort((a, b) => {
+        return new Date(b).getTime() - new Date(a).getTime();
+      });
+      that.date = ogloszenia[0];
+      this.ogloszenia = ogloszenia;
+      this.ogloszenia.shift();
+
       that.httpClient
-        .get(`assets/ogloszenia/${params['date']}.html`, {
+        .get(`assets/ogloszenia/${this.date}.html`, {
           responseType: 'arraybuffer',
         })
         .subscribe((buffer) => {
@@ -51,8 +59,6 @@ export class OgloszeniaComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.sub?.unsubscribe();
-
     const dynamicStyles = document.getElementById('dynamic-styles');
     if (dynamicStyles) {
       dynamicStyles.innerHTML = '';

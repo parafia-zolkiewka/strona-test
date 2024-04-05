@@ -2,35 +2,27 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-intencje',
+  selector: 'app-intencje.wybrane',
   standalone: true,
   imports: [RouterModule],
-  templateUrl: './intencje.component.html',
-  styleUrl: './intencje.component.css',
+  templateUrl: './intencje.wybrane.component.html',
+  styleUrl: './intencje.wybrane.component.css'
 })
-export class IntencjeComponent implements OnInit, OnDestroy {
+export class IntencjeWybraneComponent implements OnInit, OnDestroy {
   private httpClient = inject(HttpClient);
+  private route = inject(ActivatedRoute);
   private sanitizer = inject(DomSanitizer);
-  private date: string = '';
-
+  private sub: Subscription | undefined;
+  
   public content: string = '';
-  public intencje: string[] = [];
-
   ngOnInit(): void {
     const that = this;
-    that.httpClient.get('assets/intencje.json').subscribe((data) => {
-      const intencje = data as string[];
-      intencje.sort((a, b) => {
-        return new Date(b).getTime() - new Date(a).getTime();
-      });
-      that.date = intencje[0];
-      this.intencje = intencje;
-      this.intencje.shift();
-
+    that.sub = that.route.params.subscribe((params) => {
       that.httpClient
-        .get(`assets/intencje/${this.date}.html`, {
+        .get(`assets/intencje/${params['date']}.html`, {
           responseType: 'arraybuffer',
         })
         .subscribe((buffer) => {
@@ -58,6 +50,8 @@ export class IntencjeComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+
     const dynamicStyles = document.getElementById('dynamic-styles');
     if (dynamicStyles) {
       dynamicStyles.innerHTML = '';
