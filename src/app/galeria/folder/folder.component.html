@@ -1,5 +1,7 @@
 <p>folder works!</p>
-<button (click)="goBack()">Wróć</button>
+<a [routerLink]="['/galeria']">
+    <button>Wróć</button>
+</a>
 
 @if (folder) {
 <div>

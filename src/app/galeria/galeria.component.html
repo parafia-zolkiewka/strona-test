@@ -1,9 +1,11 @@
 <p>galeria works!</p>
 
 @for (folder of folders; track $index) {
-<button (click)="onOpenFolder(folder)">
-    <div>{{folder.name}}
-        <img src="https://drive.google.com/thumbnail?authuser=0&sz=w256h144&id={{folder.fileIds[0]}}">
-    </div>
-</button>
+<a [routerLink]="['/galeria', folder.name]">
+    <button>
+        <div>{{folder.name}}
+            <img src="https://drive.google.com/thumbnail?authuser=0&sz=w256h144&id={{folder.fileIds[0]}}">
+        </div>
+    </button>
+</a>
 }

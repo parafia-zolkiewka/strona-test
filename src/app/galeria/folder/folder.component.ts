@@ -1,26 +1,36 @@
-import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { Folder } from '../folder';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-folder',
   standalone: true,
-  imports: [],
+  imports: [RouterModule],
   templateUrl: './folder.component.html',
   styleUrl: './folder.component.css'
 })
-export class FolderComponent implements OnInit {
+export class FolderComponent implements OnInit, OnDestroy {
+  private httpClient = inject(HttpClient);
+  private route = inject(ActivatedRoute);
+  private sub: Subscription | undefined;
+
   public folder: Folder | undefined;
   public currentIndex = 0;
 
-constructor(private router: Router) {
-}
-
   ngOnInit(): void {
-    const navigationState = window.history.state;
-    if (navigationState && navigationState.selectedFolder) {
-      this.folder = navigationState.selectedFolder;
-    }
+    const that = this;
+    that.sub = that.route.params.subscribe((params) => {
+      that.httpClient
+        .get(`assets/zdjecia.json`, {
+          responseType: 'text',
+        })
+        .subscribe((text) => {
+          const folders = JSON.parse(text);
+          that.folder = folders.find((folder: Folder) => folder.name === params['name']);
+        });
+    });
   }
 
   moveRight() {
@@ -39,7 +49,7 @@ constructor(private router: Router) {
     }
   }
 
-  goBack() {
-    this.router.navigate(['/galeria']);
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
   }
 }
