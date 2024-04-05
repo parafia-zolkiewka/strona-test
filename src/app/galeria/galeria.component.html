@@ -1,6 +1,6 @@
 <p>galeria works!</p>
 
-@for (folder of folders; track $index) {
+@for (folder of folders; track folder.id) {
 <a [routerLink]="['/galeria', folder.name]">
     <button>
         <div>{{folder.name}}
