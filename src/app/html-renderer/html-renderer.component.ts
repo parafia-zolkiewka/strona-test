@@ -20,10 +20,39 @@ export class HtmlRendererComponent implements OnDestroy {
     const parser = new DOMParser();
     const html = parser.parseFromString(data, 'text/html');
 
-    const body = html.getElementsByTagName('body');
-    if (body[0]) {
+    const bodyCollection = html.getElementsByTagName('body');
+    const body = bodyCollection[0];
+    if (body) {
+      const wordSections = body.getElementsByClassName('WordSection1');
+      const wordSection = wordSections[0];
+      if (wordSection) {
+        const removeEmptyTag = (
+          node: Node | null,
+          next: (node: Node | null) => Node | null
+        ) => {
+          if (!node) {
+            return;
+          }
+          if (node.textContent?.trim() === '' && next(node)) {
+            removeEmptyTag(next(node), next);
+            wordSection.removeChild(node);
+          }
+        };
+        removeEmptyTag(
+          wordSection.lastChild,
+          (node) => node?.previousSibling ?? null
+        );
+        removeEmptyTag(
+          wordSection.firstChild,
+          (node) => node?.nextSibling ?? null
+        );
+        if (wordSection.firstChild?.nodeName === 'TABLE') {
+          wordSection.removeChild(wordSection.firstChild);
+        }
+      }
+
       this.content = this.sanitizer.bypassSecurityTrustHtml(
-        body[0].innerHTML
+        body.innerHTML
       ) as string;
     }
 
