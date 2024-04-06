@@ -1,61 +1,35 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Component, OnInit, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { HtmlRendererComponent } from '../html-renderer/html-renderer.component';
 
 @Component({
   selector: 'app-ogloszenia',
   standalone: true,
-  imports: [],
+  imports: [RouterModule, HtmlRendererComponent],
   templateUrl: './ogloszenia.component.html',
   styleUrl: './ogloszenia.component.css',
 })
-export class OgloszeniaComponent implements OnInit, OnDestroy {
+export class OgloszeniaComponent implements OnInit {
   private httpClient = inject(HttpClient);
-  private route = inject(ActivatedRoute);
-  private sanitizer = inject(DomSanitizer);
-  private sub: Subscription | undefined;
 
-  public content: string = '';
+  public ogloszenia: string[] = [];
+  public buffer: ArrayBuffer | undefined;
 
   ngOnInit(): void {
     const that = this;
-    that.sub = that.route.params.subscribe((params) => {
+
+    that.httpClient.get('assets/ogloszenia.json').subscribe((data) => {
+      const [date, ...ogloszenia] = data as string[];
+      that.ogloszenia = ogloszenia;
+
       that.httpClient
-        .get(`assets/ogloszenia/${params['date']}.html`, {
+        .get(`assets/ogloszenia/${date}.html`, {
           responseType: 'arraybuffer',
         })
         .subscribe((buffer) => {
-          const data = new TextDecoder('windows-1250').decode(buffer);
-
-          const parser = new DOMParser();
-          const html = parser.parseFromString(data, 'text/html');
-
-          const body = html.getElementsByTagName('body');
-          if (body[0]) {
-            that.content = that.sanitizer.bypassSecurityTrustHtml(
-              body[0].innerHTML
-            ) as string;
-          }
-
-          const dynamicStyles = document.getElementById('dynamic-styles');
-          if (dynamicStyles) {
-            const styles = html.getElementsByTagName('style');
-            if (styles[0]) {
-              dynamicStyles.innerHTML = styles[0].innerHTML;
-            }
-          }
+          that.buffer = buffer;
         });
     });
-  }
-
-  ngOnDestroy(): void {
-    this.sub?.unsubscribe();
-
-    const dynamicStyles = document.getElementById('dynamic-styles');
-    if (dynamicStyles) {
-      dynamicStyles.innerHTML = '';
-    }
   }
 }

@@ -1,3 +1,7 @@
-<p>ogloszenia works!</p>
+<app-html-renderer [buffer]="buffer"></app-html-renderer>
 
-<div style="max-width: 717px" [innerHTML]="content"></div>
+@for (ogloszenie of ogloszenia; track $index) {
+<a [routerLink]="['/ogloszenia', ogloszenie]">
+  <div>{{ ogloszenie }}</div>
+</a>
+}
