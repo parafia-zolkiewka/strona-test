@@ -1,7 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import dayjs from 'dayjs';
 import { HtmlRendererComponent } from '../html-renderer/html-renderer.component';
+import { formatDate } from '../utils';
 
 @Component({
   selector: 'app-ogloszenia',
@@ -15,6 +17,7 @@ export class OgloszeniaComponent implements OnInit {
 
   public ogloszenia: string[] = [];
   public buffer: ArrayBuffer | undefined;
+  public title: string = '';
 
   ngOnInit(): void {
     const that = this;
@@ -22,6 +25,7 @@ export class OgloszeniaComponent implements OnInit {
     that.httpClient.get('assets/ogloszenia.json').subscribe((data) => {
       const [date, ...ogloszenia] = data as string[];
       that.ogloszenia = ogloszenia;
+      that.title = `Ogłoszenia ${dayjs(date).format('D MMMM YYYY')}`;
 
       that.httpClient
         .get(`assets/ogloszenia/${date}.html`, {
@@ -31,5 +35,9 @@ export class OgloszeniaComponent implements OnInit {
           that.buffer = buffer;
         });
     });
+  }
+
+  formatDate(date: string) {
+    return formatDate(date);
   }
 }

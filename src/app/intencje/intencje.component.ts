@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { HtmlRendererComponent } from '../html-renderer/html-renderer.component';
+import { formatDate } from '../utils';
 
 @Component({
   selector: 'app-intencje',
@@ -15,12 +16,14 @@ export class IntencjeComponent implements OnInit {
 
   public intencje: string[] = [];
   public buffer: ArrayBuffer | undefined;
+  public title: string = '';
 
   ngOnInit(): void {
     const that = this;
     that.httpClient.get('assets/intencje.json').subscribe((data) => {
       const [date, ...intencje] = data as string[];
-      this.intencje = intencje;
+      that.intencje = intencje;
+      that.title = `Intencje ${formatDate(date)}`;
 
       that.httpClient
         .get(`assets/intencje/${date}.html`, {
@@ -30,5 +33,9 @@ export class IntencjeComponent implements OnInit {
           that.buffer = buffer;
         });
     });
+  }
+
+  public formatDate(date: string) {
+    return formatDate(date);
   }
 }

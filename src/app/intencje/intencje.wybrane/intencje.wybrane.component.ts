@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { HtmlRendererComponent } from '../../html-renderer/html-renderer.component';
+import { formatDate } from '../../utils';
 
 @Component({
   selector: 'app-intencje.wybrane',
@@ -18,9 +19,12 @@ export class IntencjeWybraneComponent implements OnInit, OnDestroy {
   public buffer: ArrayBuffer | undefined;
 
   public content: string = '';
+  public title: string = '';
+
   ngOnInit(): void {
     const that = this;
     that.sub = that.route.params.subscribe((params) => {
+      that.title = `Intencje ${formatDate(params['date'])}`;
       that.httpClient
         .get(`assets/intencje/${params['date']}.html`, {
           responseType: 'arraybuffer',

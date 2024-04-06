@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { HtmlRendererComponent } from '../../html-renderer/html-renderer.component';
+import { formatDate } from '../../utils';
 
 @Component({
   selector: 'app-ogloszenia.wybrane',
@@ -16,6 +17,7 @@ export class OgloszeniaWybraneComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private sub: Subscription | undefined;
   public buffer: ArrayBuffer | undefined;
+  public title: string = '';
 
   public content: string = '';
   ngOnInit(): void {
@@ -28,6 +30,7 @@ export class OgloszeniaWybraneComponent implements OnInit, OnDestroy {
         .subscribe((buffer) => {
           that.buffer = buffer;
         });
+      that.title = `Ogłoszenia ${formatDate(params['date'])}`;
     });
   }
 
