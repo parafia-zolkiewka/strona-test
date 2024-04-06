@@ -1,11 +1,7 @@
-<p>intencje works!</p>
-
-<div style="max-width: 717px" [innerHTML]="content"></div>
+<app-html-renderer [buffer]="buffer"></app-html-renderer>
 
 @for (intencja of intencje; track $index) {
-    <a [routerLink]="['/intencje', intencja]">
-        <button>
-            <div>{{intencja}}</div>
-        </button>
-    </a>
+<a [routerLink]="['/intencje', intencja]">
+  <div>{{ intencja }}</div>
+</a>
 }
