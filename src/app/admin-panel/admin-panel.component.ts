@@ -36,6 +36,10 @@ export class AdminPanelComponent implements OnInit {
   }
 
   async onUpload() {
+    console.log('date', this.date); // TODO check date format, alert if not valid
+
+    // error/success message
+
     if (!this.announcementsFile && !this.intentionsFile) {
       return;
     }
