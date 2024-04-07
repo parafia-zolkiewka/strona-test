@@ -35,6 +35,11 @@
       <mat-icon fontIcon="chevron_right"></mat-icon>
     </button>
     }
+    <div class="absolute bottom-0 left-0 right-0 flex justify-center">
+      <span class="bg-black bg-opacity-70 text-white p-2">
+        {{ currentIndex + 1 }}/{{ folder.fileIds.length }}
+      </span>
+    </div>
   </div>
 </div>
 }
