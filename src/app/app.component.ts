@@ -15,6 +15,7 @@ export class AppComponent {
   menuOpen = false;
 
   menuOptions = [
+    { name: 'Strona główna', path: '/' },
     { name: 'Ogłoszenia', path: '/ogloszenia' },
     { name: 'Intencje', path: '/intencje' },
     { name: 'Nabożeństwa', path: '/nabozenstwa' },

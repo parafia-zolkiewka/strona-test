@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { AdminPanelComponent } from './admin-panel/admin-panel.component';
 import { GaleriaComponent } from './galeria/galeria.component';
 import { HomeComponent } from './home/home.component';
 import { IntencjeComponent } from './intencje/intencje.component';
@@ -10,7 +9,13 @@ import { OgloszeniaWybraneComponent } from './ogloszenia/ogloszenia.wybrane/oglo
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
-  { path: 'admin', component: AdminPanelComponent }, // TODO lazy load
+  {
+    path: 'admin',
+    loadComponent: () =>
+      import('./admin-panel/admin-panel.component').then(
+        (m) => m.AdminPanelComponent
+      ),
+  },
   { path: 'intencje', component: IntencjeComponent },
   { path: 'intencje/:date', component: IntencjeWybraneComponent },
   { path: 'ogloszenia', component: OgloszeniaComponent },
