@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import dayjs from 'dayjs';
 import { HtmlRendererComponent } from '../html-renderer/html-renderer.component';
 import { formatDate } from '../utils';
 
@@ -21,7 +22,9 @@ export class IntencjeComponent implements OnInit {
   ngOnInit(): void {
     const that = this;
     that.httpClient.get('assets/intencje.json').subscribe((data) => {
-      const [date, ...intencje] = data as string[];
+      const [date, ...intencje] = (data as string[]).filter((date) =>
+        dayjs(date).isBefore(dayjs())
+      );
       that.intencje = intencje;
       that.title = `Intencje ${formatDate(date)}`;
 

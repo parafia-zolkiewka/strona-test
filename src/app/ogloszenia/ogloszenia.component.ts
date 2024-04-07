@@ -23,7 +23,9 @@ export class OgloszeniaComponent implements OnInit {
     const that = this;
 
     that.httpClient.get('assets/ogloszenia.json').subscribe((data) => {
-      const [date, ...ogloszenia] = data as string[];
+      const [date, ...ogloszenia] = (data as string[]).filter((date) =>
+        dayjs(date).isBefore(dayjs())
+      );
       that.ogloszenia = ogloszenia;
       that.title = `Ogłoszenia ${dayjs(date).format('D MMMM YYYY')}`;
 
