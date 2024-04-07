@@ -2,18 +2,20 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Folder } from './folder';
+import { FolderComponent } from './folder/folder.component';
 
 @Component({
   selector: 'app-galeria',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, FolderComponent],
   templateUrl: './galeria.component.html',
-  styleUrl: './galeria.component.css'
+  styleUrl: './galeria.component.css',
 })
 export class GaleriaComponent implements OnInit {
   private httpClient = inject(HttpClient);
 
   public folders: Folder[] = [];
+  public selectedFolder: Folder | undefined;
 
   ngOnInit(): void {
     this.httpClient
@@ -23,5 +25,9 @@ export class GaleriaComponent implements OnInit {
       .subscribe((data) => {
         this.folders = JSON.parse(data);
       });
+  }
+
+  selectFolder(folder: Folder | undefined) {
+    this.selectedFolder = folder;
   }
 }
