@@ -33,6 +33,7 @@ export class AdminPanelComponent implements OnInit {
 
   ngOnInit(): void {
     this.apiKey = localStorage.getItem(TOKEN_STORAGE_KEY) || '';
+    this.date = dayjs().endOf('week').format('YYYY-MM-DD');
   }
 
   private saveTokenToStorage(token: string) {
