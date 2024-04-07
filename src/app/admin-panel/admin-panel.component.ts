@@ -1,7 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import dayjs from 'dayjs';
 import { firstValueFrom } from 'rxjs';
+import { NotificationService } from '../notification.service';
 
 const TOKEN_STORAGE_KEY = 'token';
 
@@ -20,6 +22,8 @@ export class AdminPanelComponent implements OnInit {
   private announcementsFile: File | undefined;
   private intentionsFile: File | undefined;
   private httpClient = inject(HttpClient);
+  private notification = inject(NotificationService);
+
   owner = 'parafia-zolkiewka';
   repo = 'parafia-zolkiewka.github.io';
   branch = 'master';
@@ -36,26 +40,65 @@ export class AdminPanelComponent implements OnInit {
   }
 
   async onUpload() {
-    console.log('date', this.date); // TODO check date format, alert if not valid
+    (async () => {
+      if (!this.apiKey) {
+        throw new Error('Nie wypełniono pola "Token"');
+      }
 
-    // error/success message
+      const dayjsDate = dayjs(this.date, 'YYYY-MM-DD');
+      if (
+        !dayjsDate.isValid() ||
+        dayjsDate.format('YYYY-MM-DD') !== this.date
+      ) {
+        throw new Error('Brak lub nieprawidłowy format daty');
+      }
 
-    if (!this.announcementsFile && !this.intentionsFile) {
-      return;
-    }
-    try {
-      await this.fetchAndUpdateFile(this.announcementsFile, 'ogloszenia');
-      await this.fetchAndUpdateFile(this.intentionsFile, 'intencje');
-    } catch (error) {
-      console.error('Error uploading files:', error);
-    }
-    await this.onReloadContent();
+      if (!this.announcementsFile && !this.intentionsFile) {
+        throw new Error('Nie wybrano żadnego pliku');
+      }
+      if (this.announcementsFile) {
+        await this.fetchAndUpdateFile(this.announcementsFile, 'ogloszenia')
+          .then(() => {
+            this.notification.addNotification({
+              type: 'success',
+              message: 'Ogłoszenia zostały zaktualizowane',
+            });
+          })
+          .catch((error) => {
+            console.error(error);
+            this.notification.addNotification({
+              type: 'error',
+              message: 'Błąd podczas aktualizacji pliku ogłoszeń',
+            });
+          });
+      }
+      if (this.intentionsFile) {
+        await this.fetchAndUpdateFile(this.intentionsFile, 'intencje')
+          .then(() => {
+            this.notification.addNotification({
+              type: 'success',
+              message: 'Intencje zostały zaktualizowane',
+            });
+          })
+          .catch((error) => {
+            console.error(error);
+            this.notification.addNotification({
+              type: 'error',
+              message: 'Błąd podczas aktualizacji pliku intencji',
+            });
+          });
+      }
+      await this.onReloadContent();
+    })().catch((error) => {
+      console.error(error);
+      this.notification.addNotification({
+        type: 'error',
+        message: error.message,
+      });
+    });
   }
 
-  private async fetchAndUpdateFile(file: File | undefined, location: string) {
-    if (!file) {
-      return;
-    }
+  private async fetchAndUpdateFile(file: File, location: string) {
     const token = this.apiKey;
     const date = this.date;
     const path = `src/assets/${location}/${date}.html`;
@@ -104,56 +147,70 @@ export class AdminPanelComponent implements OnInit {
     sha: string | null
   ) {
     this.saveTokenToStorage(token);
-    try {
-      const value = await firstValueFrom(
-        this.httpClient.put(
-          `https://api.github.com/repos/${this.owner}/${
-            this.repo
-          }/contents/${path}?${salt()}`,
-          {
-            message: `upload file ${location}/${date}.html [skip ci]`,
-            content: await this.base64(file),
-            branch: this.branch,
-            sha: sha,
+    const value = await firstValueFrom(
+      this.httpClient.put(
+        `https://api.github.com/repos/${this.owner}/${
+          this.repo
+        }/contents/${path}?${salt()}`,
+        {
+          message: `upload file ${location}/${date}.html [skip ci]`,
+          content: await this.base64(file),
+          branch: this.branch,
+          sha: sha,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
           },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-      );
-      console.log('success', value);
-    } catch (error) {
-      console.error('error', error);
-    }
+        }
+      )
+    );
+    console.log('success', value);
   }
 
   async onReloadContent() {
-    const path = 'date.txt';
-    const token = this.apiKey;
-    const date = new Date().toISOString();
+    (async () => {
+      if (!this.apiKey) {
+        throw new Error('Nie wypełniono pola "Token"');
+      }
 
-    try {
-      const response = await firstValueFrom(
-        this.httpClient.get<{ sha: string }>(
-          `https://api.github.com/repos/${this.owner}/${
-            this.repo
-          }/contents/${path}?ref=${this.branch}&${salt()}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-      );
-      console.log('Updating existing file');
-      await this.reloadContent(path, date, response.sha, token);
-    } catch (error) {
-      console.log('Creating a new file');
-      await this.reloadContent(path, date, null, token);
-    }
+      const path = 'date.txt';
+      const token = this.apiKey;
+      const date = new Date().toISOString();
+
+      try {
+        const response = await firstValueFrom(
+          this.httpClient.get<{ sha: string }>(
+            `https://api.github.com/repos/${this.owner}/${
+              this.repo
+            }/contents/${path}?ref=${this.branch}&${salt()}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+        );
+        console.log('Updating existing file');
+        await this.reloadContent(path, date, response.sha, token);
+      } catch (error) {
+        console.log('Creating a new file');
+        await this.reloadContent(path, date, null, token);
+      }
+    })()
+      .then(() => {
+        this.notification.addNotification({
+          type: 'success',
+          message: 'Zlecono automatyczną aktualizację strony',
+        });
+      })
+      .catch((error) => {
+        this.notification.addNotification({
+          type: 'error',
+          message: error.message,
+        });
+      });
   }
 
   private async reloadContent(
@@ -163,30 +220,26 @@ export class AdminPanelComponent implements OnInit {
     token: string
   ) {
     this.saveTokenToStorage(token);
-    try {
-      const response = await firstValueFrom(
-        this.httpClient.put(
-          `https://api.github.com/repos/${this.owner}/${
-            this.repo
-          }/contents/${path}?${salt()}`,
-          {
-            message: `Reload content ${dateString}`,
-            content: await this.base64(new File([dateString], 'date.txt')),
-            branch: this.branch,
-            sha: sha, // Include sha if available, otherwise it will be omitted
+    const response = await firstValueFrom(
+      this.httpClient.put(
+        `https://api.github.com/repos/${this.owner}/${
+          this.repo
+        }/contents/${path}?${salt()}`,
+        {
+          message: `Reload content ${dateString}`,
+          content: await this.base64(new File([dateString], 'date.txt')),
+          branch: this.branch,
+          sha: sha, // Include sha if available, otherwise it will be omitted
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
           },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-      );
-      console.log('Content reload triggered successfully', response);
-    } catch (error) {
-      console.error('Error triggering content reload:', error);
-    }
+        }
+      )
+    );
+    console.log('Content reload triggered successfully', response);
   }
 
   onAnnouncementsFileChange($event: Event) {
