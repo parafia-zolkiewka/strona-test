@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
 import dayjs from 'dayjs';
 import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../notification.service';
@@ -14,7 +15,7 @@ function salt() {
 @Component({
   selector: 'app-admin-panel',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, MatIconModule],
   templateUrl: './admin-panel.component.html',
   styleUrl: './admin-panel.component.css',
 })
@@ -24,16 +25,25 @@ export class AdminPanelComponent implements OnInit {
   private httpClient = inject(HttpClient);
   private notification = inject(NotificationService);
 
-  owner = 'parafia-zolkiewka';
-  repo = 'parafia-zolkiewka.github.io';
-  branch = 'master';
+  private readonly owner = 'parafia-zolkiewka';
+  private readonly repo = 'parafia-zolkiewka.github.io';
+  private readonly branch = 'master';
 
   public apiKey: string = '';
   public date: string = '';
+  public inputType: 'text' | 'password' = 'password';
 
   ngOnInit(): void {
     this.apiKey = localStorage.getItem(TOKEN_STORAGE_KEY) || '';
     this.date = dayjs().endOf('week').format('YYYY-MM-DD');
+  }
+
+  toggleInputType() {
+    if (this.inputType === 'password') {
+      this.inputType = 'text';
+    } else {
+      this.inputType = 'password';
+    }
   }
 
   private saveTokenToStorage(token: string) {

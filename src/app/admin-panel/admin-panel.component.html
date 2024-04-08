@@ -1,7 +1,21 @@
 <div class="flex flex-col gap-4">
   <label for="token">
     Token:
-    <input id="token" placeholder="token" [(ngModel)]="apiKey" />
+    <div class="flex">
+      <input
+        id="token"
+        placeholder="token"
+        [(ngModel)]="apiKey"
+        [type]="inputType"
+      />
+      <button (click)="toggleInputType()" class="flex">
+        @if(inputType==='password'){
+        <mat-icon fontIcon="visibility"></mat-icon>
+        }@else {
+        <mat-icon fontIcon="visibility_off"></mat-icon>
+        }
+      </button>
+    </div>
   </label>
   <hr class="my-4" />
   <label for="date">
