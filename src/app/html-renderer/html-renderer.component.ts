@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { Component, Input, OnDestroy, inject } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
@@ -10,6 +11,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 })
 export class HtmlRendererComponent implements OnDestroy {
   private sanitizer = inject(DomSanitizer);
+  private document = inject(DOCUMENT);
   public content: string = '';
 
   @Input() set buffer(buffer: ArrayBuffer | undefined) {
@@ -56,7 +58,7 @@ export class HtmlRendererComponent implements OnDestroy {
       ) as string;
     }
 
-    const dynamicStyles = document.getElementById('dynamic-styles');
+    const dynamicStyles = this.document.getElementById('dynamic-styles');
     if (dynamicStyles) {
       const styles = html.getElementsByTagName('style');
       if (styles[0]) {
@@ -66,7 +68,7 @@ export class HtmlRendererComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    const dynamicStyles = document.getElementById('dynamic-styles');
+    const dynamicStyles = this.document.getElementById('dynamic-styles');
     if (dynamicStyles) {
       dynamicStyles.innerHTML = '';
     }

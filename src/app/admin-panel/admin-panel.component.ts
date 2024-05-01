@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import dayjs from 'dayjs';
 import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../notification.service';
+import { BrowserStorageService } from '../storage.service';
 
 const TOKEN_STORAGE_KEY = 'token';
 
@@ -24,6 +25,7 @@ export class AdminPanelComponent implements OnInit {
   private intentionsFile: File | undefined;
   private httpClient = inject(HttpClient);
   private notification = inject(NotificationService);
+  private localStorage = inject(BrowserStorageService);
 
   private readonly owner = 'parafia-zolkiewka';
   private readonly repo = 'parafia-zolkiewka.github.io';
@@ -34,7 +36,7 @@ export class AdminPanelComponent implements OnInit {
   public inputType: 'text' | 'password' = 'password';
 
   ngOnInit(): void {
-    this.apiKey = localStorage.getItem(TOKEN_STORAGE_KEY) || '';
+    this.apiKey = this.localStorage.getItem(TOKEN_STORAGE_KEY) || '';
     this.date = dayjs().endOf('week').format('YYYY-MM-DD');
   }
 
@@ -47,7 +49,7 @@ export class AdminPanelComponent implements OnInit {
   }
 
   private saveTokenToStorage(token: string) {
-    localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    this.localStorage.setItem(TOKEN_STORAGE_KEY, token);
   }
 
   async onUpload() {
